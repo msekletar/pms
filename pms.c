@@ -134,9 +134,20 @@ static void mpi_done(void) {
 }
 
 int main(int argc, char *argv[]) {
-
         mpi_init(argc, argv);
 
+        if (mpi_rank == 0) {
+                bool t;
+
+                t = is_invoked_by_mpirun();
+                if (!t) {
+                        fprintf(stderr, "This program is not meant to be invoked directly. "
+                                         "Please run using mpirun.\n");
+                        MPI_Abort(MPI_COMM_WORLD, 1);
+                } else
+                        MPI_Barrier(MPI_COMM_WORLD);
+        } else
+                MPI_Barrier(MPI_COMM_WORLD);
 
         mpi_done();
 
