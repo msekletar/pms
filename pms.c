@@ -22,14 +22,18 @@
 
 #include <assert.h>
 #include <errno.h>
+#include <limits.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <limits.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 #include <unistd.h>
 
 #include <mpi.h>
+
+#define INPUT_FILENAME "numbers"
 
 static int mpi_rank;
 static int mpi_world_size;
@@ -133,7 +137,57 @@ static void mpi_done(void) {
         MPI_Finalize();
 }
 
+static int read_input_file(off_t *count, unsigned char **numbers) {
+        int r;
+        FILE *f = NULL;
+        struct stat st;
+        unsigned char *_numbers = NULL;
+
+        assert(count);
+        assert(numbers);
+
+        f = fopen(INPUT_FILENAME, "re");
+        if (!f) {
+                r = -errno;
+                goto out;
+        }
+
+        r = fstat(fileno(f), &st);
+        if (r < 0) {
+                r = -errno;
+                goto out;
+        }
+
+        _numbers = malloc(st.st_size);
+        if (!_numbers) {
+                r = -errno;
+                goto out;
+        }
+
+        memset(_numbers, 0, st.st_size);
+
+        r = fread(numbers, 1, st.st_size, f);
+        if (r < 0) {
+                r = ferror(f) ? -errno : -EIO;
+                free(_numbers);
+                goto out;
+        }
+
+        *count = st.st_size;
+        *numbers = _numbers;
+
+        r = 0;
+ out:
+        if (f)
+                fclose(f);
+        return r;
+}
+
 int main(int argc, char *argv[]) {
+        int r;
+        unsigned char *numbers = NULL;
+        off_t count;
+
         mpi_init(argc, argv);
 
         if (mpi_rank == 0) {
@@ -144,12 +198,23 @@ int main(int argc, char *argv[]) {
                         fprintf(stderr, "This program is not meant to be invoked directly. "
                                          "Please run using attached script test.sh.\n");
                         MPI_Abort(MPI_COMM_WORLD, 1);
+                        return EXIT_FAILURE;
                 } else
                         MPI_Barrier(MPI_COMM_WORLD);
         } else
                 MPI_Barrier(MPI_COMM_WORLD);
 
+        if (mpi_rank == 0) {
+                r = read_input_file(&count, &numbers);
+                if (r < 0) {
+                        fprintf(stderr, "Failed to load data from input file: %m\n");
+                        MPI_Abort(MPI_COMM_WORLD, 1);
+                        return EXIT_FAILURE;
+                }
+        }
+
         mpi_done();
+        free(numbers);
 
         return EXIT_SUCCESS;
 }
