@@ -1,0 +1,9 @@
+/* natural logarithm is function from mathlib, run bc -l*/
+
+define is_pow_2(n) {
+       return n == 2^(l(n)/l(2))
+}
+
+define next_pow_2(n) {
+       return 2^(l(n)/l(2) + 1)
+}
