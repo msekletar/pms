@@ -29,6 +29,11 @@
 #include <limits.h>
 #include <unistd.h>
 
+#include <mpi.h>
+
+static int mpi_rank;
+static int mpi_world_size;
+
 static int get_process_cmdline_path(pid_t pid, char **path) {
         long len;
         char *pid_cmdline_path = NULL;
@@ -118,10 +123,22 @@ static bool is_invoked_by_mpirun(void) {
         return r;
 }
 
+static void mpi_init(int argc, char *argv[]) {
+        MPI_Init(&argc, &argv);
+        MPI_Comm_size(MPI_COMM_WORLD, &mpi_world_size);
+        MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+}
+
+static void mpi_done(void) {
+        MPI_Finalize();
+}
+
 int main(int argc, char *argv[]) {
-        /* This program is not meant to be invoked directly.
-         *  It must be invoked by attached script test.sh
-         */
+
+        mpi_init(argc, argv);
+
+
+        mpi_done();
 
         return EXIT_SUCCESS;
 }

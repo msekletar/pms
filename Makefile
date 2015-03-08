@@ -23,7 +23,7 @@ SOURCE = pms.c
 BIN = pms
 SUBMISSION_FILELIST = $(SOURCE) test.sh
 
-CC ?= gcc
+CC = mpicc
 
 ifndef DEBUG
 OPTFLAGS = -O3
