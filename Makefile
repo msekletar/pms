@@ -39,7 +39,7 @@ all: $(SOURCE)
 	$(CC) $(CFLAGS) -o $(BIN) $^
 
 clean:
-	rm -f $(BIN) $(BUT_LOGIN).tgz
+	rm -f $(BIN) $(BUT_LOGIN).tgz numbers
 
 submission:
 	tar -czf $(BUT_LOGIN).tgz $(SUBMISSION_FILELIST)
