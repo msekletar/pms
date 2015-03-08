@@ -142,7 +142,7 @@ int main(int argc, char *argv[]) {
                 t = is_invoked_by_mpirun();
                 if (!t) {
                         fprintf(stderr, "This program is not meant to be invoked directly. "
-                                         "Please run using mpirun.\n");
+                                         "Please run using attached script test.sh.\n");
                         MPI_Abort(MPI_COMM_WORLD, 1);
                 } else
                         MPI_Barrier(MPI_COMM_WORLD);
