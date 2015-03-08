@@ -183,10 +183,24 @@ static int read_input_file(off_t *count, unsigned char **numbers) {
         return r;
 }
 
+static void print_input(unsigned char *numbers, off_t count) {
+        off_t i = 0;
+
+        assert(numbers);
+        assert(count >= 0);
+
+        for (i = 0; i < count; ++i)
+                printf("%u ", numbers[i]);
+
+        printf("\n");
+
+        fflush(stdout);
+}
+
 int main(int argc, char *argv[]) {
         int r;
         unsigned char *numbers = NULL;
-        off_t count;
+        off_t count = 0;
 
         mpi_init(argc, argv);
 
@@ -211,6 +225,8 @@ int main(int argc, char *argv[]) {
                         MPI_Abort(MPI_COMM_WORLD, 1);
                         return EXIT_FAILURE;
                 }
+
+                print_input(numbers, count);
         }
 
         mpi_done();
