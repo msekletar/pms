@@ -213,12 +213,8 @@ int main(int argc, char *argv[]) {
                                          "Please run using attached script test.sh.\n");
                         MPI_Abort(MPI_COMM_WORLD, 1);
                         return EXIT_FAILURE;
-                } else
-                        MPI_Barrier(MPI_COMM_WORLD);
-        } else
-                MPI_Barrier(MPI_COMM_WORLD);
+                }
 
-        if (mpi_rank == 0) {
                 r = read_input_file(&count, &numbers);
                 if (r < 0) {
                         fprintf(stderr, "Failed to load data from input file: %m\n");
@@ -228,6 +224,8 @@ int main(int argc, char *argv[]) {
 
                 print_input(numbers, count);
         }
+
+        MPI_Barrier(MPI_COMM_WORLD);
 
         mpi_done();
         free(numbers);
