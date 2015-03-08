@@ -47,6 +47,22 @@ next_pow_2() {
     echo "$r"
 }
 
+processor_count() {
+    local r=""
+    declare -i q
+
+    if [ -z "$1" ]; then
+        echo "processor_count requires exactly one argument" 1>&2
+        exit 1
+    fi
+
+    r=$(echo "log_2($1)" | bc -lq pow2.bc 2>/dev/null)
+
+    q=${r%.*}
+    let "r=$q + 1"
+    echo "$r"
+}
+
 if [ -z "$1" ]; then
     usage
     exit 1
@@ -62,3 +78,7 @@ fi
 generate_numbers "$count"
 
 make -s
+
+np=$(processor_count "$count")
+
+mpirun -np "$np" ./pms
