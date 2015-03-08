@@ -166,7 +166,7 @@ static int read_input_file(off_t *count, unsigned char **numbers) {
 
         memset(_numbers, 0, st.st_size);
 
-        r = fread(numbers, 1, st.st_size, f);
+        r = fread(_numbers, st.st_size, 1, f);
         if (r < 0) {
                 r = ferror(f) ? -errno : -EIO;
                 free(_numbers);
