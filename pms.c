@@ -35,6 +35,13 @@
 
 #define INPUT_FILENAME "numbers"
 
+enum {
+        _QUEUE_INVALID,
+        QUEUE1,
+        QUEUE2,
+        _QUEUE_MAX
+};
+
 static int mpi_rank;
 static int mpi_world_size;
 
