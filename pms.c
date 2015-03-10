@@ -127,10 +127,25 @@ static bool is_invoked_by_mpirun(void) {
         return r;
 }
 
+static void mpi_err_handler(MPI_Comm *c, int *status, ...) {
+        fprintf(stderr, "Encountered an unrecoverable runtime error. Execution aborted.\n");
+
+        MPI_Abort(MPI_COMM_WORLD, 1);
+}
+
 static void mpi_init(int argc, char *argv[]) {
+        static MPI_Errhandler handler;
+
         MPI_Init(&argc, &argv);
+
         MPI_Comm_size(MPI_COMM_WORLD, &mpi_world_size);
         MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+
+        /* In case of communication error algorithm might produce incorrect result.
+           If that happens we shouldn't continue and abort execution
+        */
+        MPI_Errhandler_create(mpi_err_handler, &handler);
+        MPI_Comm_set_errhandler(MPI_COMM_WORLD, handler);
 }
 
 static void mpi_done(void) {
