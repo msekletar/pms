@@ -159,7 +159,7 @@ static void mpi_done(void) {
         MPI_Finalize();
 }
 
-static int read_input_file(off_t *count, unsigned char **numbers) {
+static int read_input_file(int *count, unsigned char **numbers) {
         int r;
         FILE *f = NULL;
         struct stat st;
@@ -195,7 +195,7 @@ static int read_input_file(off_t *count, unsigned char **numbers) {
                 goto out;
         }
 
-        *count = st.st_size;
+        *count = (int) st.st_size;
         *numbers = _numbers;
 
         r = 0;
@@ -205,8 +205,8 @@ static int read_input_file(off_t *count, unsigned char **numbers) {
         return r;
 }
 
-static void print_input(unsigned char *numbers, off_t count) {
-        off_t i = 0;
+static void print_input(unsigned char *numbers, int count) {
+        int i = 0;
 
         assert(numbers);
         assert(count >= 0);
@@ -222,7 +222,7 @@ static void print_input(unsigned char *numbers, off_t count) {
 int main(int argc, char *argv[]) {
         int r;
         unsigned char *numbers = NULL;
-        off_t count = 0;
+        int count = 0;
 
         mpi_init(argc, argv);
 
