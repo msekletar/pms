@@ -226,7 +226,7 @@ static void input_processor(unsigned char *numbers, int count) {
 
         assert(numbers);
         assert(count > 0);
-        assert((int) log(count)/log(2) + 1 == mpi_world_size);
+        assert((int) (log(count)/log(2)) + 1 == mpi_world_size);
 
         /* We are reading input buffer from the end so that numbers at the end are sent first */
         for (i = count - 1, j = 0; i >= 0; ++i, ++j)
