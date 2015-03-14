@@ -232,7 +232,7 @@ static void input_processor(unsigned char *numbers, int count) {
         for (i = count - 1, j = 0; i >= 0; ++i, ++j)
                 MPI_Isend(&numbers[i],
                           1,
-                          MPI_INT,
+                          MPI_UNSIGNED_CHAR,
                           1,
                           j % _QUEUE_MAX,
                           MPI_COMM_WORLD,
