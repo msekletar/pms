@@ -219,7 +219,7 @@ static void print_input(unsigned char *numbers, int count) {
         fflush(stdout);
 }
 
-static void input_processor(unsigned char *numbers) {
+static void input_processor(unsigned char *numbers, int count) {
         /* not implemented */
 }
 
@@ -253,7 +253,7 @@ int main(int argc, char *argv[]) {
 
 
         if (mpi_rank == 0)
-                input_processor(numbers);
+                input_processor(numbers, count);
 
 
 
