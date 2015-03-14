@@ -302,12 +302,9 @@ int main(int argc, char *argv[]) {
                 }
 
                 print_input(numbers, count);
-        }
 
-
-        if (mpi_rank == 0)
                 input_processor(numbers, count);
-        else
+        } else
                 merging_processor(1 << (mpi_world_size - 1));
 
         mpi_done();
