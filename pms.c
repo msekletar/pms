@@ -233,7 +233,7 @@ static void input_processor(unsigned char *numbers, int count) {
                 MPI_Isend(&numbers[i],
                           1,
                           MPI_UNSIGNED_CHAR,
-                          1,
+                          mpi_rank + 1,
                           j % _QUEUE_MAX,
                           MPI_COMM_WORLD,
                           &send_requests[j]);
