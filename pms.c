@@ -219,6 +219,10 @@ static void print_input(unsigned char *numbers, int count) {
         fflush(stdout);
 }
 
+static void input_processor(unsigned char *numbers) {
+        /* not implemented */
+}
+
 int main(int argc, char *argv[]) {
         int r;
         unsigned char *numbers = NULL;
@@ -246,6 +250,11 @@ int main(int argc, char *argv[]) {
 
                 print_input(numbers, count);
         }
+
+
+        if (mpi_rank == 0)
+                input_processor(numbers);
+
 
 
         mpi_done();
