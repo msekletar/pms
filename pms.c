@@ -236,7 +236,7 @@ static void input_processor(unsigned char *numbers, int count) {
                           1,
                           j % _QUEUE_MAX,
                           MPI_COMM_WORLD,
-                          &send_requests[i]);
+                          &send_requests[j]);
 
         MPI_Waitall(count, send_requests, MPI_STATUSES_IGNORE);
 }
