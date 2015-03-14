@@ -247,7 +247,6 @@ int main(int argc, char *argv[]) {
                 print_input(numbers, count);
         }
 
-        MPI_Barrier(MPI_COMM_WORLD);
 
         mpi_done();
         free(numbers);
