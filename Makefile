@@ -31,7 +31,8 @@ else
 OPTFLAGS = -O0 -ggdb3
 endif
 
-CFLAGS += -D_GNU_SOURCE -std=gnu99 -Wall $(OPTFLAGS)
+LDFLAGS += -lm
+CFLAGS += -D_GNU_SOURCE -std=gnu99 -Wall $(OPTFLAGS) $(LDFLAGS)
 
 .PHONY: clean submission
 

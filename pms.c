@@ -23,6 +23,7 @@
 #include <assert.h>
 #include <errno.h>
 #include <limits.h>
+#include <math.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -220,7 +221,24 @@ static void print_input(unsigned char *numbers, int count) {
 }
 
 static void input_processor(unsigned char *numbers, int count) {
-        /* not implemented */
+        int i, j;
+        MPI_Request send_requests[count];
+
+        assert(numbers);
+        assert(count > 0);
+        assert((int) log(count)/log(2) + 1 == mpi_world_size);
+
+        /* We are reading input buffer from the end so that numbers at the end are sent first */
+        for (i = count - 1, j = 0; i >= 0; ++i, ++j)
+                MPI_Isend(&numbers[i],
+                          1,
+                          MPI_INT,
+                          1,
+                          j % _QUEUE_MAX,
+                          MPI_COMM_WORLD,
+                          &send_requests[i]);
+
+        MPI_Waitall(count, send_requests, MPI_STATUS_IGNORE);
 }
 
 int main(int argc, char *argv[]) {
