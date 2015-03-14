@@ -243,6 +243,33 @@ static void input_processor(unsigned char *numbers, int count) {
                 MPI_Abort(MPI_COMM_WORLD, -EPIPE);
 }
 
+static int queue_receive_n(int queue, int n, unsigned char *q) {
+        int received = 0;
+
+        assert(q);
+        assert(n > 0);
+
+        while (received < n) {
+                int count;
+                MPI_Status receive_status;
+
+                MPI_Recv(&q[received],
+                         n,
+                         MPI_UNSIGNED_CHAR,
+                         mpi_rank - 1,
+                         queue,
+                         MPI_COMM_WORLD,
+                         &receive_status);
+
+                MPI_Get_count(&receive_status, MPI_UNSIGNED_CHAR, &count);
+
+                received += count;
+
+                assert(receive_status.MPI_SOURCE == mpi_rank - 1);
+                assert(receive_status.MPI_TAG == queue);
+        }
+}
+
 static void merging_processor(int count) {
 
 }
