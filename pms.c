@@ -221,7 +221,7 @@ static void print_input(unsigned char *numbers, int count) {
 }
 
 static void input_processor(unsigned char *numbers, int count) {
-        int i, j;
+        int r, i, j;
         MPI_Request send_requests[count];
 
         assert(numbers);
@@ -238,7 +238,9 @@ static void input_processor(unsigned char *numbers, int count) {
                           MPI_COMM_WORLD,
                           &send_requests[j]);
 
-        MPI_Waitall(count, send_requests, MPI_STATUSES_IGNORE);
+        r = MPI_Waitall(count, send_requests, MPI_STATUSES_IGNORE);
+        if (r != MPI_SUCCESS)
+                MPI_Abort(MPI_COMM_WORLD, -EPIPE);
 }
 
 int main(int argc, char *argv[]) {
