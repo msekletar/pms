@@ -268,6 +268,8 @@ static int queue_receive_n(int queue, int n, unsigned char *q) {
                 assert(receive_status.MPI_SOURCE == mpi_rank - 1);
                 assert(receive_status.MPI_TAG == queue);
         }
+
+        return 0;
 }
 
 static void merging_processor(int count) {
