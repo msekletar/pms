@@ -243,6 +243,10 @@ static void input_processor(unsigned char *numbers, int count) {
                 MPI_Abort(MPI_COMM_WORLD, -EPIPE);
 }
 
+static void merging_processor(int count) {
+
+}
+
 int main(int argc, char *argv[]) {
         int r;
         unsigned char *numbers = NULL;
@@ -274,8 +278,8 @@ int main(int argc, char *argv[]) {
 
         if (mpi_rank == 0)
                 input_processor(numbers, count);
-
-
+        else
+                merging_processor(1 << (mpi_world_size - 1));
 
         mpi_done();
         free(numbers);
