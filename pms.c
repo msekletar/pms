@@ -245,30 +245,29 @@ static void input_processor(unsigned char *numbers, int count) {
                 MPI_Abort(MPI_COMM_WORLD, -EPIPE);
 }
 
-static int queue_receive_n(int queue, int n, unsigned char *q) {
+static int queue_receive_n(queue<unsigned char>* q, int n, int queue_id) {
         int received = 0;
 
         assert(q);
         assert(n >= 0);
 
         while (received < n) {
-                int count;
-                MPI_Status receive_status;
+                MPI_Status recv_status;
+                unsigned char e;
 
-                MPI_Recv(&q[received],
-                         n - received,
+                MPI_Recv(&e,
+                         1,
                          MPI_UNSIGNED_CHAR,
                          mpi_rank - 1,
-                         queue,
+                         queue_id,
                          MPI_COMM_WORLD,
-                         &receive_status);
+                         &recv_status);
 
-                MPI_Get_count(&receive_status, MPI_UNSIGNED_CHAR, &count);
-
-                received += count;
-
-                assert(receive_status.MPI_SOURCE == mpi_rank - 1);
-                assert(receive_status.MPI_TAG == queue);
+                q->push(e);
+                ++received;
+                
+                assert(recv_status.MPI_SOURCE == mpi_rank - 1);
+                assert(recv_status.MPI_TAG == queue_id);
         }
 
         return 0;
