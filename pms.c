@@ -176,7 +176,7 @@ static bool is_invoked_by_mpirun(void) {
 static void mpi_err_handler(MPI_Comm *c, int *status, ...) {
         fprintf(stderr, "Encountered an unrecoverable runtime error. Execution aborted.\n");
 
-        MPI_Abort(MPI_COMM_WORLD, 1);
+        abort();
 }
 
 static void mpi_init(int argc, char *argv[]) {
@@ -192,8 +192,6 @@ static void mpi_init(int argc, char *argv[]) {
         */
         MPI_Errhandler_create(mpi_err_handler, &handler);
         MPI_Comm_set_errhandler(MPI_COMM_WORLD, handler);
-
-        abort();
 }
 
 static void mpi_done(void) {
