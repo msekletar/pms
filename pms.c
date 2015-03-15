@@ -317,6 +317,51 @@ static void print_n_queue_elements(queue<unsigned char> *q, int n) {
                 q->pop();
         }
 }
+
+static int queue_send_n(queue<unsigned char> *q, int n, int queue_id) {
+        int sent = 0;
+
+        assert(q);
+        assert(n >= 0);
+        assert(queue_id < _QUEUE_MAX);
+
+        if (n == 0)
+                return 0;
+
+        /* last processor doesn't send data, but it prints them to standard output */
+        if (mpi_rank == mpi_world_size - 1) {
+                print_n_queue_elements(q, n);
+                return 0;
+        }
+
+        while (sent < n) {
+                MPI_Request *r;
+                unsigned char *send_buffer;
+                SendCommunication c;
+
+                send_buffer = (unsigned char *) calloc(1, sizeof(unsigned char));
+                r = (MPI_Request *) calloc(1, sizeof(MPI_Request));
+
+                *send_buffer = q->front();
+                q->pop();
+
+                MPI_Isend(send_buffer,
+                          1,
+                          MPI_UNSIGNED_CHAR,
+                          mpi_rank + 1,
+                          queue_id,
+                          MPI_COMM_WORLD,
+                          r);
+
+                c.buf = send_buffer;
+                c.mpi_request = r;
+
+                send_communications.push_back(c);
+                ++sent;
+        }
+
+        return 0;
+}
 static void merging_processor(int count) {
 
 }
