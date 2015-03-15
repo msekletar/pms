@@ -59,9 +59,10 @@ struct SendCommunication {
 
 private:
         bool finished(void) {
-                int flag;
+                int flag = 0;
 
-                MPI_Test(mpi_request, &flag, MPI_STATUS_IGNORE);
+                if (mpi_request)
+                        MPI_Test(mpi_request, &flag, MPI_STATUS_IGNORE);
 
                 return !!flag;
         }
