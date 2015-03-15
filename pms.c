@@ -309,6 +309,8 @@ int main(int argc, char *argv[]) {
         } else
                 merging_processor(1 << (mpi_world_size - 1));
 
+        MPI_Barrier(MPI_COMM_WORLD);
+        
         mpi_done();
         free(numbers);
 
