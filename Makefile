@@ -23,7 +23,7 @@ SOURCE = pms.c
 BIN = pms
 SUBMISSION_FILELIST = $(SOURCE) test.sh
 
-CC = mpicc
+CC = mpiCC
 
 ifndef DEBUG
 OPTFLAGS = -O3
@@ -32,7 +32,7 @@ OPTFLAGS = -O0 -ggdb3
 endif
 
 LDFLAGS += -lm
-CFLAGS += -D_GNU_SOURCE -std=gnu99 -Wall $(OPTFLAGS) $(LDFLAGS)
+CFLAGS += -D_GNU_SOURCE -std=gnu++11 -Wall $(OPTFLAGS) $(LDFLAGS)
 
 .PHONY: clean submission
 

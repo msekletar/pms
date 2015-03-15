@@ -58,7 +58,7 @@ static int get_process_cmdline_path(pid_t pid, char **path) {
         if (len < 0)
                 return errno ? -errno : -ENOTSUP;
 
-        pid_cmdline_path = malloc(len + strlen("/proc/") + 1);
+        pid_cmdline_path = (char *) malloc(len + strlen("/proc/") + 1);
         if (!pid_cmdline_path)
                 return -ENOMEM;
 
@@ -183,7 +183,7 @@ static int read_input_file(int *count, unsigned char **numbers) {
                 goto out;
         }
 
-        _numbers = malloc(st.st_size);
+        _numbers = (unsigned char *) malloc(st.st_size);
         if (!_numbers) {
                 r = -errno;
                 goto out;
