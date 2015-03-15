@@ -66,13 +66,17 @@ private:
         }
 
 public:
+        bool valid(void) {
+                return !!mpi_request;
+        }
+
         void free_if_finished() {
                 if (!finished())
                         return;
-                
+
                 MPI_Request_free(mpi_request);
                 mpi_request = NULL;
-                
+
                 free(buf);
                 buf = NULL;
         }
