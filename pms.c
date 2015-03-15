@@ -386,10 +386,15 @@ static void merging_processor(int count) {
 
         assert((int) (log(count)/log(2)) + 1 == mpi_world_size);
 
+        /* we start receiving data from QUEUE1 */
         queue_id = QUEUE1;
+
+        /* each processor merges two queues, and maximum length of each is 2^(rank - 1) */
         max_queue_len = 1 << (mpi_rank - 1);
 
+        /* algorithm finishes when processor seen all elements from input sequence */
         while (processed < count) {
+                /* in each iteration is pointers Q1 and Q2 alternates */ 
                 unsigned q1_processed = 0, q2_processed = 0;
                 int Q1_id = queue_id % _QUEUE_MAX;
                 int Q2_id = (queue_id + 1) % _QUEUE_MAX;
@@ -397,12 +402,15 @@ static void merging_processor(int count) {
                 queue<unsigned char>* Q2 = &queues[Q2_id];
 
 
+                /* algorithm requires first queue to be full to proceed */
                 if (Q1->size() < max_queue_len)
                         queue_receive_n(Q1, max_queue_len - Q1->size(), Q1_id);
 
+                /* in the other queue there must be at least one element */
                 if (Q2->size() == 0)
                         queue_receive_n(Q2, 1, Q2_id);
 
+                /* compare first element from each queue and pass the smaller one to the next processor */
                 while (q1_processed < max_queue_len && q2_processed < max_queue_len) {
 
                         if (Q1->front() < Q2->front()) {
@@ -417,10 +425,13 @@ static void merging_processor(int count) {
                         }
                 }
 
+                /* at least one queue must be empty at this point */
                 assert(Q1->empty() || Q2->empty());
 
+                /* make sure data are on its way down the pipeline */
                 dispatch_communications();
 
+                /* process rest of the other queue before starting next iteration */
                 if (!Q1->empty()) {
                         queue_send_n(Q1, Q1->size(), Q1_id);
                 } else {
@@ -434,9 +445,13 @@ static void merging_processor(int count) {
 
                 }
 
+                /* again make sure that data are on its way */
                 dispatch_communications();
-                
+
+                /* increment queue_id counter so Q1 is Q2 and the other-way around on next iteration  */ 
                 queue_id++;
+
+                /* increment processed counter, ensures finiteness of the algorithm */
                 processed += 2 * max_queue_len;
         }
 }
