@@ -380,7 +380,65 @@ static void dispatch_communications() {
 }
 
 static void merging_processor(int count) {
+        int processed = 0, queue_id;
+        size_t max_queue_len;
+        queue<unsigned char> queues[2];
 
+        assert((int) (log(count)/log(2)) + 1 == mpi_world_size);
+
+        queue_id = QUEUE1;
+        max_queue_len = 1 << (mpi_rank - 1);
+
+        while (processed < count) {
+                unsigned q1_processed = 0, q2_processed = 0;
+                int Q1_id = queue_id % _QUEUE_MAX;
+                int Q2_id = (queue_id + 1) % _QUEUE_MAX;
+                queue<unsigned char>* Q1 = &queues[Q1_id];
+                queue<unsigned char>* Q2 = &queues[Q2_id];
+
+
+                if (Q1->size() < max_queue_len)
+                        queue_receive_n(Q1, max_queue_len - Q1->size(), Q1_id);
+
+                if (Q2->size() == 0)
+                        queue_receive_n(Q2, 1, Q2_id);
+
+                while (q1_processed < max_queue_len && q2_processed < max_queue_len) {
+
+                        if (Q1->front() < Q2->front()) {
+                                queue_send_n(Q1, 1, Q1_id);
+                                ++q1_processed;
+                        } else {
+                                queue_send_n(Q2, 1, Q1_id);
+                                ++q2_processed;
+
+                                if (q2_processed != max_queue_len)
+                                        queue_receive_n(Q2, 1, Q2_id);
+                        }
+                }
+
+                assert(Q1->empty() || Q2->empty());
+
+                dispatch_communications();
+
+                if (!Q1->empty()) {
+                        queue_send_n(Q1, Q1->size(), Q1_id);
+                } else {
+                        q2_processed += Q2->size();
+                        queue_send_n(Q2, Q2->size(), Q1_id);
+
+                        queue_receive_n(Q2, max_queue_len - q2_processed, Q2_id);
+
+                        q2_processed += Q2->size();
+                        queue_send_n(Q2, Q2->size(), Q1_id);
+
+                }
+
+                dispatch_communications();
+                
+                queue_id++;
+                processed += 2 * max_queue_len;
+        }
 }
 
 int main(int argc, char *argv[]) {
