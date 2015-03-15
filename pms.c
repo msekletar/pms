@@ -52,6 +52,34 @@ using namespace std;
 static int mpi_rank;
 static int mpi_world_size;
 
+struct SendCommunication {
+        MPI_Request *mpi_request;
+        unsigned char *buf;
+
+private:
+        bool finished(void) {
+                int flag;
+
+                MPI_Test(mpi_request, &flag, MPI_STATUS_IGNORE);
+
+                return !!flag;
+        }
+
+public:
+        void free_if_finished() {
+                if (!finished())
+                        return;
+                
+                MPI_Request_free(mpi_request);
+                mpi_request = NULL;
+                
+                free(buf);
+                buf = NULL;
+        }
+};
+
+static vector<SendCommunication> send_communications;
+
 static int get_process_cmdline_path(pid_t pid, char **path) {
         long len;
         char *pid_cmdline_path = NULL;
