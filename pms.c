@@ -76,9 +76,7 @@ public:
                 if (!finished())
                         return;
 
-                MPI_Request_free(mpi_request);
-                mpi_request = NULL;
-
+                free(mpi_request);
                 free(buf);
                 buf = NULL;
         }
