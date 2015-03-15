@@ -362,6 +362,23 @@ static int queue_send_n(queue<unsigned char> *q, int n, int queue_id) {
 
         return 0;
 }
+
+static void dispatch_communications() {
+        list<SendCommunication>::iterator it;
+        
+        if (mpi_rank == mpi_world_size -1)
+                return;
+
+        for_each(send_communications.begin(), send_communications.end(), [](SendCommunication &c) {
+                      c.free_if_finished();
+                });
+
+        remove_if(send_communications.begin(), send_communications.end(), [](SendCommunication &c) {
+                        return !c.valid();
+                });
+
+}
+
 static void merging_processor(int count) {
 
 }
