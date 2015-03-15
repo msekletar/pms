@@ -154,6 +154,8 @@ static void mpi_init(int argc, char *argv[]) {
         */
         MPI_Errhandler_create(mpi_err_handler, &handler);
         MPI_Comm_set_errhandler(MPI_COMM_WORLD, handler);
+
+        abort();
 }
 
 static void mpi_done(void) {
