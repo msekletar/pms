@@ -34,6 +34,10 @@
 
 #include <mpi.h>
 
+#include <array>
+#include <vector>
+#include <queue>
+
 #define INPUT_FILENAME "numbers"
 
 enum {
@@ -42,6 +46,8 @@ enum {
         QUEUE2,
         _QUEUE_MAX
 };
+
+using namespace std;
 
 static int mpi_rank;
 static int mpi_world_size;
