@@ -34,8 +34,9 @@
 
 #include <mpi.h>
 
+#include <algorithm>
 #include <array>
-#include <vector>
+#include <list>
 #include <queue>
 
 #define INPUT_FILENAME "numbers"
@@ -82,7 +83,7 @@ public:
         }
 };
 
-static vector<SendCommunication> send_communications;
+static list<SendCommunication> send_communications;
 
 static int get_process_cmdline_path(pid_t pid, char **path) {
         long len;
