@@ -21,7 +21,7 @@ BUT_LOGIN = xsekle00
 
 SOURCE = pms.c
 BIN = pms
-SUBMISSION_FILELIST = $(SOURCE) test.sh
+SUBMISSION_FILELIST = $(SOURCE) Makefile test.sh pow2.bc
 
 CC = mpiCC
 
