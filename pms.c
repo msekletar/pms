@@ -302,7 +302,7 @@ static int queue_receive_n(queue<unsigned char>* q, int n, int queue_id) {
 
                 q->push(e);
                 ++received;
-                
+
                 assert(recv_status.MPI_SOURCE == mpi_rank - 1);
                 assert(recv_status.MPI_TAG == queue_id);
         }
@@ -365,12 +365,12 @@ static int queue_send_n(queue<unsigned char> *q, int n, int queue_id) {
 
 static void dispatch_communications() {
         list<SendCommunication>::iterator it;
-        
+
         if (mpi_rank == mpi_world_size -1)
                 return;
 
         for_each(send_communications.begin(), send_communications.end(), [](SendCommunication &c) {
-                      c.free_if_finished();
+                        c.free_if_finished();
                 });
 
         remove_if(send_communications.begin(), send_communications.end(), [](SendCommunication &c) {
@@ -394,7 +394,7 @@ static void merging_processor(int count) {
 
         /* algorithm finishes when processor seen all elements from input sequence */
         while (processed < count) {
-                /* in each iteration is pointers Q1 and Q2 alternates */ 
+                /* in each iteration is pointers Q1 and Q2 alternates */
                 unsigned q1_processed = 0, q2_processed = 0;
                 int Q1_id = queue_id % _QUEUE_MAX;
                 int Q2_id = (queue_id + 1) % _QUEUE_MAX;
@@ -448,7 +448,7 @@ static void merging_processor(int count) {
                 /* again make sure that data are on its way */
                 dispatch_communications();
 
-                /* increment queue_id counter so Q1 is Q2 and the other-way around on next iteration  */ 
+                /* increment queue_id counter so Q1 is Q2 and the other-way around on next iteration  */
                 queue_id++;
 
                 /* increment processed counter, ensures finiteness of the algorithm */
@@ -488,7 +488,7 @@ int main(int argc, char *argv[]) {
                 merging_processor(1 << (mpi_world_size - 1));
 
         MPI_Barrier(MPI_COMM_WORLD);
-        
+
         mpi_done();
         free(numbers);
 
