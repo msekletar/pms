@@ -37,8 +37,8 @@
 #define INPUT_FILENAME "numbers"
 
 enum {
-        _QUEUE_INVALID,
-        QUEUE1,
+        _QUEUE_INVALID = -1,
+        QUEUE1 = 0,
         QUEUE2,
         _QUEUE_MAX
 };
