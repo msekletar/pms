@@ -77,6 +77,7 @@ public:
                         return;
 
                 free(mpi_request);
+                mpi_request = NULL;
                 free(buf);
                 buf = NULL;
         }
