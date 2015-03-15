@@ -249,14 +249,14 @@ static int queue_receive_n(int queue, int n, unsigned char *q) {
         int received = 0;
 
         assert(q);
-        assert(n > 0);
+        assert(n >= 0);
 
         while (received < n) {
                 int count;
                 MPI_Status receive_status;
 
                 MPI_Recv(&q[received],
-                         n,
+                         n - received,
                          MPI_UNSIGNED_CHAR,
                          mpi_rank - 1,
                          queue,
