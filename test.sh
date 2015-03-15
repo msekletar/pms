@@ -81,4 +81,10 @@ make -s
 
 np=$(processor_count "$count")
 
-mpirun -np "$np" ./pms
+if [ "$(hostname)" = "merlin.fit.vutbr.cz" ]; then
+    mpirun --prefix /usr/local/share/OpenMPI -np "$np" ./pms
+else
+    mpirun -np "$np" ./pms
+fi
+
+
