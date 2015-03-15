@@ -309,6 +309,13 @@ static int queue_receive_n(queue<unsigned char>* q, int n, int queue_id) {
         return 0;
 }
 
+static void print_n_queue_elements(queue<unsigned char> *q, int n) {
+
+        for (int i = 0; i < n; ++i) {
+                printf("%d\n", (int)  q->front());
+                q->pop();
+        }
+}
 static void merging_processor(int count) {
 
 }
