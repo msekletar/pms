@@ -435,12 +435,18 @@ static void merging_processor(int count) {
                 if (!Q1->empty()) {
                         queue_send_n(Q1, Q1->size(), Q1_id);
                 } else {
+                        /* we handle Q2 a bit differnt because we are receiveing on it one element at a time */
                         q2_processed += Q2->size();
+
+                        /* send what is already queued up */
                         queue_send_n(Q2, Q2->size(), Q1_id);
 
+                        /* receive elements possibly waiting in the input buffer */
                         queue_receive_n(Q2, max_queue_len - q2_processed, Q2_id);
 
                         q2_processed += Q2->size();
+
+                        /* send them down the pipeline */
                         queue_send_n(Q2, Q2->size(), Q1_id);
 
                 }
