@@ -462,6 +462,14 @@ static void merging_processor(int count) {
         }
 }
 
+void pipeline_merge_sort(unsigned char *numbers, int count) {
+
+        if (mpi_rank == 0)
+                input_processor(numbers, count);
+        else
+                merging_processor(1 << (mpi_world_size - 1));
+}
+
 int main(int argc, char *argv[]) {
         int r;
         unsigned char *numbers = NULL;
@@ -488,11 +496,10 @@ int main(int argc, char *argv[]) {
                 }
 
                 print_input(numbers, count);
+        }
 
-                input_processor(numbers, count);
-        } else
-                merging_processor(1 << (mpi_world_size - 1));
-
+        pipeline_merge_sort(numbers, count);
+                
         MPI_Barrier(MPI_COMM_WORLD);
 
         mpi_done();
