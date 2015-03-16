@@ -61,8 +61,13 @@ private:
         bool finished(void) {
                 int flag = 0;
 
-                if (mpi_request)
+                if (mpi_request) 
                         MPI_Test(mpi_request, &flag, MPI_STATUS_IGNORE);
+
+                if (flag) {
+                        mpi_request = NULL;
+                        buf = NULL;
+                }
 
                 return !!flag;
         }
@@ -75,11 +80,6 @@ public:
         void free_if_finished() {
                 if (!finished())
                         return;
-
-                free(mpi_request);
-                mpi_request = NULL;
-                free(buf);
-                buf = NULL;
         }
 };
 
