@@ -364,7 +364,6 @@ static int queue_send_n(queue<unsigned char> *q, int n, int queue_id) {
 }
 
 static void dispatch_communications() {
-        list<SendCommunication>::iterator it;
 
         if (mpi_rank == mpi_world_size -1)
                 return;
