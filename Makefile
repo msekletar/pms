@@ -28,7 +28,8 @@ CC = mpiCC
 ifndef DEBUG
 OPTFLAGS = -O3
 else
-OPTFLAGS = -O0 -ggdb3
+OPTFLAGS = -O0 -ggdb3 -fsanitize=address -fno-omit-frame-pointer
+LDFLAGS = -lasan
 endif
 
 LDFLAGS += -lm
