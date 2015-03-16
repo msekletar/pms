@@ -454,7 +454,7 @@ static void merging_processor(int count) {
                 /* again make sure that data are on its way */
                 dispatch_communications();
 
-                /* increment queue_id counter so Q1 is Q2 and the other-way around on next iteration  */
+                /* increment queue_id counter so Q1 becomes Q2 and the other-way around on next iteration  */
                 queue_id++;
 
                 /* increment processed counter, ensures finiteness of the algorithm */
