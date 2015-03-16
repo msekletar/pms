@@ -26,7 +26,7 @@ SUBMISSION_FILELIST = $(SOURCE) Makefile test.sh pow2.bc
 CC = mpiCC
 
 ifndef DEBUG
-OPTFLAGS = -O3
+OPTFLAGS = -O3 -DNDEBUG
 else
 OPTFLAGS = -O0 -ggdb3 -fsanitize=address -fno-omit-frame-pointer
 LDFLAGS = -lasan
