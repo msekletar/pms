@@ -19,7 +19,7 @@
 
 BUT_LOGIN = xsekle00
 
-SOURCE = pms.c
+SOURCE = pms.cpp
 BIN = pms
 SUBMISSION_FILELIST = $(SOURCE) Makefile test.sh pow2.bc
 
