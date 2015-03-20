@@ -476,6 +476,10 @@ int main(int argc, char *argv[]) {
                 print_input(numbers, count);
         }
 
+        /* make sure that input processor has enough time to print input sequence */
+        if (mpi_rank != 0)
+                usleep(10000);
+
         pipeline_merge_sort(numbers, count);
 
         MPI_Barrier(MPI_COMM_WORLD);
