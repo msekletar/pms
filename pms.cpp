@@ -60,12 +60,7 @@ static bool is_finished(SendCommunication *c) {
         int flag = 0;
 
         if (c->mpi_request)
-                MPI_Test(c->mpi_request, &flag, MPI_STATUS_IGNORE);
-
-        if (flag) {
-                c->mpi_request = NULL;
-                c->buf = NULL;
-        }
+                MPI_Request_get_status(*c->mpi_request, &flag, MPI_STATUS_IGNORE);
 
         return !!flag;
 }
@@ -303,8 +298,9 @@ static void print_n_queue_elements(queue<unsigned char> *q, int n) {
         }
 }
 
-static int queue_send_n(queue<unsigned char> *q, int n, int queue_id) {
+static int queue_send_n(queue<unsigned char> *q, int n, int queue_id, unsigned char *send_buffers, MPI_Request *mpi_requests) {
         int sent = 0;
+        static int i = 0;
 
         assert(q);
         assert(n >= 0);
@@ -324,8 +320,8 @@ static int queue_send_n(queue<unsigned char> *q, int n, int queue_id) {
                 unsigned char *send_buffer;
                 SendCommunication c;
 
-                send_buffer = (unsigned char *) calloc(1, sizeof(unsigned char));
-                r = (MPI_Request *) calloc(1, sizeof(MPI_Request));
+                send_buffer = send_buffers + i;
+                r = mpi_requests + i;
 
                 *send_buffer = q->front();
                 q->pop();
@@ -343,6 +339,7 @@ static int queue_send_n(queue<unsigned char> *q, int n, int queue_id) {
 
                 send_communications.push_back(c);
                 ++sent;
+                ++i;
         }
 
         return 0;
@@ -362,11 +359,22 @@ static void wait_for_communications(list<SendCommunication> *send_communications
 }
 
 static void merging_processor(int count) {
+        unsigned char *send_buffers = NULL;
+        MPI_Request *mpi_requests = NULL;
         int processed = 0, queue_id;
         size_t max_queue_len;
         queue<unsigned char> queues[2];
 
         assert((int) (log(count)/log(2)) + 1 == mpi_world_size);
+
+        /* allocate resource for async communication */
+        send_buffers = (unsigned char *) calloc(count, sizeof(unsigned char));
+        if (!send_buffers)
+                abort();
+
+        mpi_requests = (MPI_Request *) calloc(count, sizeof(MPI_Request));
+        if (!mpi_requests)
+                abort();
 
         /* we start receiving data from QUEUE1 */
         queue_id = QUEUE1;
@@ -396,10 +404,10 @@ static void merging_processor(int count) {
                 while (q1_processed < max_queue_len && q2_processed < max_queue_len) {
 
                         if (Q1->front() < Q2->front()) {
-                                queue_send_n(Q1, 1, Q1_id);
+                                queue_send_n(Q1, 1, Q1_id, send_buffers, mpi_requests);
                                 ++q1_processed;
                         } else {
-                                queue_send_n(Q2, 1, Q1_id);
+                                queue_send_n(Q2, 1, Q1_id, send_buffers, mpi_requests);
                                 ++q2_processed;
 
                                 if (q2_processed != max_queue_len)
@@ -412,13 +420,13 @@ static void merging_processor(int count) {
 
                 /* process rest of the other queue before starting next iteration */
                 if (!Q1->empty()) {
-                        queue_send_n(Q1, Q1->size(), Q1_id);
+                        queue_send_n(Q1, Q1->size(), Q1_id, send_buffers, mpi_requests);
                 } else {
                         /* we handle Q2 a bit differnt because we are receiveing on it one element at a time */
                         q2_processed += Q2->size();
 
                         /* send what is already queued up */
-                        queue_send_n(Q2, Q2->size(), Q1_id);
+                        queue_send_n(Q2, Q2->size(), Q1_id, send_buffers, mpi_requests);
 
                         /* receive elements possibly waiting in the input buffer */
                         queue_receive_n(Q2, max_queue_len - q2_processed, Q2_id);
@@ -426,7 +434,7 @@ static void merging_processor(int count) {
                         q2_processed += Q2->size();
 
                         /* send them down the pipeline */
-                        queue_send_n(Q2, Q2->size(), Q1_id);
+                        queue_send_n(Q2, Q2->size(), Q1_id, send_buffers, mpi_requests);
 
                 }
 
@@ -438,6 +446,8 @@ static void merging_processor(int count) {
         }
 
         wait_for_communications(&send_communications);
+        free(mpi_requests);
+        free(send_buffers);
 }
 
 void pipeline_merge_sort(unsigned char *numbers, int count) {
