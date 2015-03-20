@@ -41,7 +41,7 @@
 
 enum {
         _QUEUE_INVALID = -1,
-        QUEUE1 = 0,
+        QUEUE1,
         QUEUE2,
         _QUEUE_MAX
 };
