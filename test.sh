@@ -77,7 +77,9 @@ fi
 
 generate_numbers "$count"
 
-make -s
+if [ ! -x "./pms" ]; then
+    make -s
+fi
 
 np=$(processor_count "$count")
 
