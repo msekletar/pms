@@ -56,32 +56,21 @@ static int mpi_world_size;
 struct SendCommunication {
         MPI_Request *mpi_request;
         unsigned char *buf;
-
-private:
-        bool finished(void) {
-                int flag = 0;
-
-                if (mpi_request) 
-                        MPI_Test(mpi_request, &flag, MPI_STATUS_IGNORE);
-
-                if (flag) {
-                        mpi_request = NULL;
-                        buf = NULL;
-                }
-
-                return !!flag;
-        }
-
-public:
-        bool valid(void) {
-                return !!mpi_request;
-        }
-
-        void free_if_finished() {
-                if (!finished())
-                        return;
-        }
 };
+
+bool is_finished(SendCommunication *c) {
+        int flag = 0;
+
+        if (c->mpi_request)
+                MPI_Test(c->mpi_request, &flag, MPI_STATUS_IGNORE);
+
+        if (flag) {
+                c->mpi_request = NULL;
+                c->buf = NULL;
+        }
+
+        return !!flag;
+}
 
 static list<SendCommunication> send_communications;
 
@@ -363,19 +352,17 @@ static int queue_send_n(queue<unsigned char> *q, int n, int queue_id) {
         return 0;
 }
 
-static void dispatch_communications() {
+static void wait_for_communications(list<SendCommunication> *send_communications) {
+        auto i = send_communications->begin();
 
         if (mpi_rank == mpi_world_size -1)
                 return;
 
-        for_each(send_communications.begin(), send_communications.end(), [](SendCommunication &c) {
-                        c.free_if_finished();
-                });
-
-        remove_if(send_communications.begin(), send_communications.end(), [](SendCommunication &c) {
-                        return !c.valid();
-                });
-
+        while (!send_communications->empty()) {
+                while (i != send_communications->end())
+                        if (is_finished(&*i))
+                                send_communications->erase(i++);
+        }
 }
 
 static void merging_processor(int count) {
@@ -427,9 +414,6 @@ static void merging_processor(int count) {
                 /* at least one queue must be empty at this point */
                 assert(Q1->empty() || Q2->empty());
 
-                /* make sure data are on its way down the pipeline */
-                dispatch_communications();
-
                 /* process rest of the other queue before starting next iteration */
                 if (!Q1->empty()) {
                         queue_send_n(Q1, Q1->size(), Q1_id);
@@ -450,15 +434,14 @@ static void merging_processor(int count) {
 
                 }
 
-                /* again make sure that data are on its way */
-                dispatch_communications();
-
                 /* increment queue_id counter so Q1 becomes Q2 and the other-way around on next iteration  */
                 queue_id++;
 
                 /* increment processed counter, ensures finiteness of the algorithm */
                 processed += 2 * max_queue_len;
         }
+
+        wait_for_communications(&send_communications);
 }
 
 void pipeline_merge_sort(unsigned char *numbers, int count) {
@@ -498,7 +481,7 @@ int main(int argc, char *argv[]) {
         }
 
         pipeline_merge_sort(numbers, count);
-                
+
         MPI_Barrier(MPI_COMM_WORLD);
 
         mpi_done();
