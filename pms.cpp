@@ -32,12 +32,12 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-#include <mpi.h>
-
 #include <list>
 #include <queue>
 
-#define INPUT_FILENAME "numbers"
+#include <mpi.h>
+
+using namespace std;
 
 enum {
         _QUEUE_INVALID = -1,
@@ -46,17 +46,17 @@ enum {
         _QUEUE_MAX
 };
 
-using namespace std;
-
-static int mpi_rank;
-static int mpi_world_size;
-
 struct SendCommunication {
         MPI_Request *mpi_request;
         unsigned char *buf;
 };
 
-bool is_finished(SendCommunication *c) {
+static int mpi_rank;
+static int mpi_world_size;
+static list<SendCommunication> send_communications;
+static const char *INPUT_FILENAME = "numbers";
+
+static bool is_finished(SendCommunication *c) {
         int flag = 0;
 
         if (c->mpi_request)
@@ -69,8 +69,6 @@ bool is_finished(SendCommunication *c) {
 
         return !!flag;
 }
-
-static list<SendCommunication> send_communications;
 
 static int get_process_cmdline_path(pid_t pid, char **path) {
         long len;
