@@ -33,7 +33,7 @@ LDFLAGS = -lasan
 endif
 
 LDFLAGS += -lm
-CFLAGS += -D_GNU_SOURCE -std=gnu++11 -Wall $(OPTFLAGS) $(LDFLAGS)
+CFLAGS += -D_GNU_SOURCE -std=gnu++11 -Wall -march=native -mtune=native $(OPTFLAGS) $(LDFLAGS)
 
 .PHONY: clean submission
 
